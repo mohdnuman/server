@@ -5,6 +5,8 @@ const {getDataFromProtocol}=require("./handler");
 
 const apiCall = (address, page) => `https://api.scanmydefi.com/address/${address}/transactions?limit=${process.env.limit}&page=${page}`
 
+const {UserModel}=require("./model");
+
 //Array for infura servers
 const serverArr = [
    "https://mainnet.infura.io/v3/9301e02f0e164f06b918b08b5321ad96",
@@ -82,6 +84,43 @@ async function getDataFromTxnHash() { //MAIN function
                 }
                 dataObjects=await Promise.all(dataBuildingCalls);
                 // console.log(dataObjects);
+
+                let operations = [];
+                dataObjects.forEach((user) => {
+                  if(user.length!=undefined){
+                    for(let i=0;i<user.length;i++){
+                      operations.push({
+                        "updateOne": {
+                          "filter": {
+                            userAddress: user[i].userAddress,
+                            protocolName: user[i].protocolName,
+                            tag: user[i].tag,
+                            poolName: user[i].poolName,
+                            balanceContractAddress: user[i].balanceContractAddress
+                          },
+                          "update": user[i],
+                          "upsert": true,
+                        },
+                      });
+                    }
+                  }else{
+                  operations.push({
+                    "updateOne": {
+                      "filter": {
+                        userAddress: user.userAddress,
+                        protocolName: user.protocolName,
+                        tag: user.tag,
+                        poolName: user.poolName,
+                      },
+                      "update": user,
+                      "upsert": true,
+                    },
+                  });
+                }
+                });
+                await UserModel.bulkWrite(operations, { ordered: false });
+
+
 
                 process.env.page=pageReturned;
                 console.log(`${count} rows entered. On page ${page}`);
