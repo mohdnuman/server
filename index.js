@@ -1,9 +1,23 @@
 const axios = require("axios");
 const Web3 = require("web3");
-require('dotenv').config();
+const config=require("./config.json");
 const {getDataFromProtocol}=require("./handler");
+const fs = require('fs').promises;
 
-const apiCall = (address, page) => `https://api.scanmydefi.com/address/${address}/transactions?limit=${process.env.limit}&page=${page}`
+const setValue = (fn, page) => {
+  fs.readFile(fn)
+    .then(body => JSON.parse(body))
+    .then(json => {
+      // manipulate your data here
+      json.page = page
+      return json
+    })
+    .then(json => JSON.stringify(json))
+    .then(body => fs.writeFile(fn, body))
+    .catch(error => console.warn(error))
+}
+
+const apiCall = (address, page) => `https://api.scanmydefi.com/address/${address}/transactions?limit=${config.limit}&page=${page}`
 
 const {UserModel}=require("./model");
 
@@ -15,7 +29,7 @@ const serverArr = [
    "https://mainnet.infura.io/v3/a3745c6dc07c45dcbf183d7743ee19c9"
 ];
 // Contract address for the protocol
-let address = process.env.address;
+let address = config.address;
 address = address.toLowerCase();
 var web3Server = [];
 for (let i = 0; i < serverArr.length; ++i) {
@@ -53,7 +67,7 @@ async function getDataFromTxnHash() { //MAIN function
         try {
             let count=0;
             let flag=true;
-            let page=parseInt(process.env.page);
+            let page=parseInt(config.page);
             while(flag){
                 var {txnHashList, blockTimestampList, pageReturned} = await getTxnHashList(address,page);
                 transactionsPromises=[]
@@ -122,7 +136,7 @@ async function getDataFromTxnHash() { //MAIN function
 
 
 
-                process.env.page=pageReturned;
+                await setValue("config.json",pageReturned);
                 console.log(`${count} rows entered. On page ${page}`);
                 page=pageReturned;
            }
