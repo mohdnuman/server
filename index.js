@@ -5,7 +5,7 @@ const config=require("./config.json");
 const {getDataFromProtocol}=require("./handler");
 const fs = require('fs').promises;
 
-const setValue = async(fn, page) => {
+const setPage = async(fn, page) => {
   fs.readFile(fn)
     .then(body => JSON.parse(body))
     .then(json => {
@@ -166,8 +166,8 @@ async function getDataFromTxnHash() { //MAIN function
 
 
 
-                await setValue("config.json",pageReturned);
-                console.log(`${count} rows entered. On page ${page}`);
+                await setPage("config.json",pageReturned);
+                console.log(`${count} user documents inserted/updated from page ${page}`);
                 page=pageReturned;
            }
             console.log("processed finished")
