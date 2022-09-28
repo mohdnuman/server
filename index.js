@@ -1,10 +1,11 @@
 const axios = require("axios");
+const { exit } = require("process");
 const Web3 = require("web3");
 const config=require("./config.json");
 const {getDataFromProtocol}=require("./handler");
 const fs = require('fs').promises;
 
-const setValue = (fn, page) => {
+const setValue = async(fn, page) => {
   fs.readFile(fn)
     .then(body => JSON.parse(body))
     .then(json => {
@@ -91,6 +92,7 @@ async function getDataFromTxnHash() { //MAIN function
             let count=0;
             let flag=true;
             let page=parseInt(config.page);
+            console.log("attempting to start server from page no.",page);
             while(flag){
                 var {txnHashList, blockTimestampList, pageReturned} = await getTxnHashList(address,page);
                 transactionsPromises=[]
@@ -102,13 +104,18 @@ async function getDataFromTxnHash() { //MAIN function
 
                 transactionsReceiptPromises=[]
                 txnHashList.forEach((hash,iter)=>{
-                    count++
                     transactionsReceiptPromises.push(web3Server[iter%web3Server.length].eth.getTransactionReceipt(hash))
                 })
                 transactionsReceipts = await Promise.all(transactionsPromises);
 
                 dataBuildingCalls=[];
                 for(let iterTransaction=0;iterTransaction<transactionsData.length;++iterTransaction){
+                    if(transactionsData[iterTransaction].to==null){
+                      continue;
+                    }
+                    if(transactionsReceipts[iterTransaction].status==false){
+                      continue;
+                    }
                     txData=transactionsData[iterTransaction];
                     txReceipt=transactionsReceipts[iterTransaction];
                     blockTimestamp = blockTimestampList[iterTransaction];
@@ -120,7 +127,6 @@ async function getDataFromTxnHash() { //MAIN function
                     dataBuildingCalls.push(getDataFromProtocol(userAddress,contractAddress,logs,methodId,blockTimestamp))
                 }
                 dataObjects=await Promise.all(dataBuildingCalls);
-                // console.log(dataObjects);
 
                 let operations = [];
                 dataObjects.forEach((user) => {
@@ -148,6 +154,7 @@ async function getDataFromTxnHash() { //MAIN function
                         protocolName: user.protocolName,
                         tag: user.tag,
                         poolName: user.poolName,
+                        balanceContractAddress: user.balanceContractAddress
                       },
                       "update": user,
                       "upsert": true,

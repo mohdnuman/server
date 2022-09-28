@@ -2,7 +2,7 @@ const abi=require("./hex_abi.json");
 const Web3 = require("web3");
 var web3 = new Web3(
   new Web3.providers.HttpProvider(
-    "https://mainnet.infura.io/v3/da5fdf67575f4552998efd9df43f6c9b"
+    "https://mainnet.infura.io/v3/dc287669d7b54e7484ba2203f1312447"
   )
 );
 
@@ -18,7 +18,6 @@ getData=async(userAddress,blockTimestamp)=>{
                 let stake=await contract.methods.stakeLists(userAddress,i).call();
                 totalStake+=stake.stakedHearts/10**8;
             }
-            console.log("staked balance of",userAddress,totalStake,"HEX");
 
             let dataObject={
                 userAddress:userAddress,
