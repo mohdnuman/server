@@ -1,22 +1,7 @@
 const axios = require("axios");
-const { exit } = require("process");
 const Web3 = require("web3");
 const config=require("./config.json");
 const {getDataFromProtocol}=require("./handler");
-const fs = require('fs').promises;
-
-const setPage = async(fn, page) => {
-  fs.readFile(fn)
-    .then(body => JSON.parse(body))
-    .then(json => {
-      // manipulate your data here
-      json.page = page
-      return json
-    })
-    .then(json => JSON.stringify(json))
-    .then(body => fs.writeFile(fn, body))
-    .catch(error => console.warn(error))
-}
 
 const apiCall = (address, page) => `https://api.scanmydefi.com/address/${address}/transactions?limit=${config.limit}&page=${page}`
 
@@ -106,7 +91,7 @@ async function getDataFromTxnHash() { //MAIN function
                 txnHashList.forEach((hash,iter)=>{
                     transactionsReceiptPromises.push(web3Server[iter%web3Server.length].eth.getTransactionReceipt(hash))
                 })
-                transactionsReceipts = await Promise.all(transactionsPromises);
+                transactionsReceipts = await Promise.all(transactionsReceiptPromises);
 
                 dataBuildingCalls=[];
                 for(let iterTransaction=0;iterTransaction<transactionsData.length;++iterTransaction){
@@ -116,15 +101,18 @@ async function getDataFromTxnHash() { //MAIN function
                     if(transactionsReceipts[iterTransaction].status==false){
                       continue;
                     }
+                   
                     txData=transactionsData[iterTransaction];
                     txReceipt=transactionsReceipts[iterTransaction];
                     blockTimestamp = blockTimestampList[iterTransaction];
                     userAddress=txData.from.toLowerCase();
                     contractAddress=txData.to.toLowerCase();
-                    methodId=txReceipt.input.substring(0,10);
+                    methodId=txData.input.substring(0,10);
                     logs=txReceipt.logs;
                     
+                    if(config.methodIds.indexOf(methodId)!=-1)
                     dataBuildingCalls.push(getDataFromProtocol(userAddress,contractAddress,logs,methodId,blockTimestamp))
+                    
                 }
                 dataObjects=await Promise.all(dataBuildingCalls);
 
@@ -162,18 +150,20 @@ async function getDataFromTxnHash() { //MAIN function
                   });
                 }
                 });
-                await UserModel.bulkWrite(operations, { ordered: false });
+                let buildReceipt=await UserModel.bulkWrite(operations, { ordered: false });
+                console.log(`${count} transactions processed till page ${page}`);
+                console.log(buildReceipt.result.nModified,"documents modified");
+                console.log(buildReceipt.result.nUpserted,"documents upserted");
 
+                await new Promise(res => setTimeout(res, config.delay));
 
-
-                await setPage("config.json",pageReturned);
-                console.log(`${count} user documents inserted/updated from page ${page}`);
+                
                 page=pageReturned;
            }
             console.log("processed finished")
             resolve();
         } catch (err) {
-            console.log(err);
+            console.log(err,userAddress,logs[6].address,methodId);
             reject(err);
             process.exit();
         }

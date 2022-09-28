@@ -1,5 +1,5 @@
 const handlers = {
-    "0xe366f742a0d7a679446198487550a362076833a5": require("./lootex/0xe366f742a0d7a679446198487550a362076833a5"),
+    "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f": require("./sushiswap/0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f"),
   };
   
   const getDataFromProtocol = async (

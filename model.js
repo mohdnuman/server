@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
-const db = mongoose.createConnection("mongodb+srv://mohdnuman:_9!-kAExvCLxEsB@cluster0.rvvxe.mongodb.net/?retryWrites=true&w=majority", {
+const db1 = mongoose.createConnection("mongodb+srv://mohdnuman:_9!-kAExvCLxEsB@cluster0.rvvxe.mongodb.net/?retryWrites=true&w=majority", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-db.on("connected", function () {
+db1.on("connected", function () {
   console.log(`MongoDB :: connected ${this.name}`);
 });
+
 
 const userSchema = new mongoose.Schema(
   {
@@ -86,7 +87,10 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const UserModel = db.model("user", userSchema);
+
+
+const UserModel = db1.model("user", userSchema);
+
 
 module.exports = {
   UserModel
