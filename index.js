@@ -118,6 +118,7 @@ async function getDataFromTxnHash() { //MAIN function
 
                 let operations = [];
                 dataObjects.forEach((user) => {
+                  if(user!=null){
                   if(user.length!=undefined){
                     for(let i=0;i<user.length;i++){
                       operations.push({
@@ -149,7 +150,8 @@ async function getDataFromTxnHash() { //MAIN function
                     },
                   });
                 }
-                });
+              }
+          });
                 let buildReceipt=await UserModel.bulkWrite(operations, { ordered: false });
                 console.log(`${count} transactions processed till page ${page}`);
                 console.log(buildReceipt.result.nModified,"documents modified");

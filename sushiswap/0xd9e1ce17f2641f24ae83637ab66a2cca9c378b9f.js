@@ -76,6 +76,9 @@ getData = async (userAddress, blockTimestamp, logs, methodId) => {
       let token1amount =
         (LPtokensReceived / totalSupply) * (reserves[1] / 10 ** decimals1);
 
+        if(token0amount==0 && token1amount==0){
+          resolve(null);
+        }
 
       let dataObject = [
         {
