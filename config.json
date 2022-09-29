@@ -3,5 +3,6 @@
   "limit": 50,
   "address": "0x66e76b0f2c69cfd9282f1d80f6f00686d611452b",
   "delay": 500,
-  "methodIds":["0x7b0472f0","0x01ed681f","0x41753399"]
+  "methodIds":["0x7b0472f0","0x01ed681f","0x41753399"],
+  "twitterDelayTransactions":500
 }
