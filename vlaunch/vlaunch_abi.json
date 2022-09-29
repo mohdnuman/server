@@ -1,0 +1,37 @@
+[
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "stakingNonce",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "rewards",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "name": "stakingInfoForAddress",
+    "outputs": [
+      { "internalType": "address", "name": "owner", "type": "address" },
+      { "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "internalType": "uint256", "name": "timeToUnlock", "type": "uint256" },
+      { "internalType": "uint256", "name": "stakingTime", "type": "uint256" },
+      { "internalType": "uint256", "name": "tokensStaked", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "tokensStakedWithBonus",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

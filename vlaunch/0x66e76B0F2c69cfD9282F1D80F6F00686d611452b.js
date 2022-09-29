@@ -1,4 +1,4 @@
-const abi = require("./vader_abi.json");
+const abi = require("./vlaunch_abi.json");
 const Web3 = require("web3");
 const serverArr = [
   "https://mainnet.infura.io/v3/65ef0d20bce5453297371820335b0409",
@@ -38,55 +38,50 @@ getData = async (userAddress, blockTimestamp, logs, methodId) => {
           serverArr[blockTimestamp % serverArr.length]
         )
       );
-      const staker = "0x665ff8fAA06986Bd6f1802fA6C1D2e7d780a7369";
-      const stakingInstance = new web3.eth.Contract(abi, staker);
 
-      const vader = "0x2602278EE1882889B946eb11DC0E810075650983";
-      const vaderInstance = new web3.eth.Contract(abi, vader);
+      const VPADADD = "0x66e76B0F2c69cfD9282F1D80F6F00686d611452b";
+      var Decimal = 10 ** 18;
+      let token = "0x51FE2E572e97BFEB1D719809d743Ec2675924EDc";
+      token = token.toLowerCase();
+      const VPADContract = new web3.eth.Contract(abi, VPADADD);
+      var stakingNUM = await VPADContract.methods
+        .stakingNonce(userAddress)
+        .call();
 
-      let userAddresses = [];
-      if (methodId == "0xa9059cbb") {
-        userAddresses.push(userAddress);
-        let user2 = logs[0].topics[2];
-        user2 = user2.slice(-41,-1);
-        user2 = "0x" + user2;
-        userAddresses.push(user2);
-        console.log(userAddresses)
-      } else {
-        userAddresses.push(userAddress);
+      let total = 0;
+      for (var i = 0; i < stakingNUM; i++) {
+        const TimeToUnlock = await VPADContract.methods
+          .stakingInfoForAddress(userAddress, i)
+          .call();
+        Timestacking = new Date(TimeToUnlock[2] * 1000).toLocaleString(
+          undefined,
+          { timeZone: "UTC" }
+        );
+
+        const staking = await VPADContract.methods
+          .stakingInfoForAddress(userAddress, i)
+          .call();
+        let newstaking = staking[4] / Decimal;
+        total += newstaking;
       }
 
-      let dataObjects = [];
-      for (let i = 0; i < userAddresses.length; i++) {
-        let xVader = await stakingInstance.methods
-          .balanceOf(userAddresses[i])
-          .call();
-        let totalVaderContract = await vaderInstance.methods
-          .balanceOf(staker)
-          .call();
-        let totalShares = await stakingInstance.methods.totalSupply().call();
-        let amount = (xVader * totalVaderContract) / totalShares;
-        amount = amount / 10 ** 18;
-        console.log(userAddresses[i],amount)
-
-        if (amount == 0) {
-          resolve(null);
-        }
-
-        let dataObject = {
-          userAddress: userAddresses[i],
-          chain: "ETH",
-          protocolName: "vader",
-          tag: "Staked",
-          poolName: "VADER",
-          balance: amount,
-          balanceSymbol: "VADER",
-          balanceContractAddress: vader.toLowerCase(),
-          blockTimestamp: blockTimestamp,
-        };
-        dataObjects.push(dataObject);
+      if (total == 0) {
+        resolve(null);
       }
-      resolve(dataObjects);
+
+      let dataObject = {
+        userAddress: userAddress,
+        chain: "ETH",
+        protocolName: "vlaunch",
+        tag: "Staked",
+        poolName: "VPAD",
+        balance: total,
+        balanceSymbol: "VPAD",
+        balanceContractAddress: token,
+        blockTimestamp: blockTimestamp,
+      };
+
+      resolve(dataObject);
     } catch (error) {
       reject(error);
     }
