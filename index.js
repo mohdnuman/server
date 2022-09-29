@@ -106,7 +106,7 @@ async function getDataFromTxnHash() { //MAIN function
                     txReceipt=transactionsReceipts[iterTransaction];
                     blockTimestamp = blockTimestampList[iterTransaction];
                     userAddress=txData.from.toLowerCase();
-                    contractAddress=txData.to.toLowerCase();
+                    contractAddress=txData.to;
                     methodId=txData.input.substring(0,10);
                     logs=txReceipt.logs;
                     
@@ -165,7 +165,7 @@ async function getDataFromTxnHash() { //MAIN function
             console.log("processed finished")
             resolve();
         } catch (err) {
-            console.log(err,userAddress,logs[6].address,methodId);
+            console.log(err);
             reject(err);
             process.exit();
         }
